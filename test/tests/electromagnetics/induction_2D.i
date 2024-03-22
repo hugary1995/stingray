@@ -1,5 +1,7 @@
 # frequency
-f = 150000
+f0 = 1000
+omega0 = '${fparse 2*pi*f0}'
+f = 10000
 omega = '${fparse 2*pi*f}'
 
 # magnetic permeability
@@ -48,7 +50,7 @@ iy = 0
     block_id = 0
     block_name = air
     bottom_left = '0 0 0'
-    top_right = '0.1 0.1 0'
+    top_right = '1 0.1 0'
   []
   [workpiece]
     type = SubdomainBoundingBoxGenerator
@@ -123,6 +125,7 @@ iy = 0
     coupled_variable = Aim_x
     prop = ind_coef
     coefficient = -1
+    block = 'workpiece air'
   []
   [real_induction_y]
     type = MaterialReaction
@@ -130,6 +133,7 @@ iy = 0
     coupled_variable = Aim_y
     prop = ind_coef
     coefficient = -1
+    block = 'workpiece air'
   []
   [applied_current_x]
     type = MaterialSource
@@ -167,6 +171,7 @@ iy = 0
     coupled_variable = Are_x
     prop = ind_coef
     coefficient = 1
+    block = 'workpiece air'
   []
   [imag_induction_y]
     type = MaterialReaction
@@ -174,6 +179,14 @@ iy = 0
     coupled_variable = Are_y
     prop = ind_coef
     coefficient = 1
+    block = 'workpiece air'
+  []
+[]
+
+[Functions]
+  [omega]
+    type = ParsedFunction
+    expression = 'if(t<1, ${omega0}*t, (t-1)*(${omega}-${omega0})+${omega0})'
   []
 []
 
@@ -213,18 +226,11 @@ iy = 0
     property_name = ind_coef
     expression = 'omega * sigma'
     material_property_names = 'omega sigma'
-    block = 'workpiece air'
-  []
-  [induction_coef_coil]
-    type = ADGenericConstantMaterial
-    prop_names = 'ind_coef'
-    prop_values = '0'
-    block = 'coil'
   []
   [frequency]
     type = ADGenericFunctionMaterial
     prop_names = 'omega'
-    prop_values = 't*${omega}'
+    prop_values = 'omega'
   []
   [current]
     type = EddyCurrent
@@ -257,6 +263,11 @@ iy = 0
 []
 
 [Postprocessors]
+  [omega]
+    type = FunctionValuePostprocessor
+    function = omega
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
   [power_workpiece]
     type = ADElementIntegralMaterialProperty
     mat_prop = q
@@ -267,12 +278,6 @@ iy = 0
     type = ADElementIntegralMaterialProperty
     mat_prop = q
     block = 'air'
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [power_coil]
-    type = ADElementIntegralMaterialProperty
-    mat_prop = q
-    block = 'coil'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
@@ -297,7 +302,7 @@ iy = 0
   l_tol = 1e-06
 
   dt = 0.05
-  end_time = 1
+  end_time = 2
 []
 
 [Outputs]
