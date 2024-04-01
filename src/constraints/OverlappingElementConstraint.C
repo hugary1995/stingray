@@ -9,7 +9,6 @@ OverlappingElementConstraint::validParams()
   InputParameters params = ElemElemConstraint::validParams();
   params.addRequiredParam<SubdomainName>("primary", "primary block id");
   params.addRequiredParam<std::vector<SubdomainName>>("secondary", "list of secondary block ids");
-  params.suppressParameter<unsigned int>("interface_id");
 
   return params;
 }

@@ -28,8 +28,8 @@ void
 FourierPotentialTempl<T>::computeQpProperties()
 {
   auto grad_T = _grad_T[_qp];
-  if (getBlockCoordSystem() == Moose::COORD_RZ)
-    grad_T(2) = _T[_qp] / _q_point[_qp](0);
+  // if (getBlockCoordSystem() == Moose::COORD_RZ)
+  //   grad_T(2) = _T[_qp] / _q_point[_qp](0);
 
   _d_H_d_grad_lnT[_qp] = _kappa[_qp] * _grad_T[_qp];
   _H[_qp] = 0.5 * _d_H_d_grad_lnT[_qp] * _grad_T[_qp] / _T[_qp];

@@ -61,8 +61,14 @@ OverlappingElementPairLocator::reinit()
         for (auto primary_elem : primary_elems)
         {
           std::pair<const Elem *, const Elem *> pair{primary_elem, secondary_elem};
-          ElementPairInfo info(
-              primary_elem, secondary_elem, qpoints, qpoints, JxW, JxW, normal, normal);
+          ElementPairInfo info(primary_elem,
+                               secondary_elem,
+                               {qpoints[i]},
+                               {qpoints[i]},
+                               {JxW[i]},
+                               {JxW[i]},
+                               normal,
+                               normal);
           _overlapping_elem_pairs.push_back(pair);
           _element_pair_info.emplace(pair, info);
           _secondary_qpoints.push_back(qpoints[i]);
