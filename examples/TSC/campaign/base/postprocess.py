@@ -33,7 +33,7 @@ ax.set(
 )
 fig.colorbar(cntr, ax=ax)
 fig.tight_layout()
-fig.savefig("mean.png")
+fig.savefig("mean.svg")
 plt.close()
 
 fig, ax = plt.subplots()
@@ -47,5 +47,5 @@ ax.set(
 )
 fig.colorbar(cntr, ax=ax)
 fig.tight_layout()
-fig.savefig("cv.png")
+fig.savefig("cv.svg")
 plt.close()
