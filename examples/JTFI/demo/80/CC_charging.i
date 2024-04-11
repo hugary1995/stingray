@@ -41,18 +41,18 @@ beta = 0.9
 [Mesh]
   [cathode]
     type = FileMeshGenerator
-    file = 'gold/NMC_50pct.exo'
+    file = 'gold/NMC_80pct.exo'
   []
   [refine]
     type = RefineBlockGenerator
     input = cathode
-    block = 'electrolyte particles'
+    block = 'electrolytes particles'
     refinement = '0 0'
   []
   [rename_blocks]
     type = RenameBlockGenerator
     input = refine
-    old_block = 'electrolyte particles'
+    old_block = 'electrolytes particles'
     new_block = 'SSE CAM'
   []
   [rename_boundaries]
