@@ -2,22 +2,34 @@ sample = 0
 mesh_matrix = 'RVE/${sample}/matrix.msh'
 mesh_alt = 'RVE/${sample}/alt.msh'
 mesh_cf = 'RVE/${sample}/cf.msh'
+mesh_cnt1 = 'RVE/${sample}/cnt1.msh'
+mesh_cnt2 = 'RVE/${sample}/cnt2.msh'
 
-fibers = 'cf alt'
+fibers = 'cf alt cnt1 cnt2'
 
 sigma_resin = 50 # S/mm
 sigma_cf = 500 # S/mm
 sigma_alt = 100 # S/mm
+sigma_cnt1 = 8000 # S/mm
+sigma_cnt2 = 8000 # S/mm
 
-ECR_cf = 1
-ECR_alt = 1
+ECR_cf = 72.5
+ECR_alt = 74
+ECR_cnt1 = 1
+ECR_cnt2 = 1
 
 r_cf = '${fparse 8.5e-3/2}' # mm
 r_alt = '${fparse 1.3e-2/2}' # mm
+r_cnt1 = '${fparse 7.5e-3/2}' # mm
+r_cnt2 = '${fparse 7.5e-3/2}' # mm
 A_cf = '${fparse pi*r_cf^2}'
 A_alt = '${fparse pi*r_alt^2}'
+A_cnt1 = '${fparse pi*r_cnt1^2}'
+A_cnt2 = '${fparse pi*r_cnt2^2}'
 C_cf = '${fparse 2*pi*r_cf}'
 C_alt = '${fparse 2*pi*r_alt}'
+C_cnt1 = '${fparse 2*pi*r_cnt1}'
+C_cnt2 = '${fparse 2*pi*r_cnt2}'
 
 E = 1
 matrix_x = 0.5 # mm
@@ -55,9 +67,33 @@ matrix_x = 0.5 # mm
     bottom_left = '0 0 0'
     top_right = '1 1 1'
   []
+  [cnt10]
+    type = FileMeshGenerator
+    file = '${mesh_cnt1}'
+  []
+  [cnt1]
+    type = SubdomainBoundingBoxGenerator
+    input = cnt10
+    block_id = 3
+    block_name = 'cnt1'
+    bottom_left = '0 0 0'
+    top_right = '1 1 1'
+  []
+  [cnt20]
+    type = FileMeshGenerator
+    file = '${mesh_cnt2}'
+  []
+  [cnt2]
+    type = SubdomainBoundingBoxGenerator
+    input = cnt20
+    block_id = 5
+    block_name = 'cnt2'
+    bottom_left = '0 0 0'
+    top_right = '1 1 1'
+  []
   [combine]
     type = CombinerGenerator
-    inputs = 'matrix alt cf'
+    inputs = 'matrix alt cf cnt1 cnt2'
   []
 []
 
@@ -107,7 +143,7 @@ matrix_x = 0.5 # mm
     type = RankOneDivergence
     variable = Phi
     vector = i
-    factor = 0.42365597814
+    factor = 0.40848208562
     save_in = ir
     block = 'resin'
   []
@@ -152,6 +188,22 @@ matrix_x = 0.5 # mm
     resistance = '${fparse ECR_alt/C_alt}'
     interface_id = 1
   []
+  [resistance_cnt1]
+    type = EmbeddedMaterialConstraint
+    variable = Phi
+    primary = 'resin'
+    secondary = 'cnt1'
+    resistance = '${fparse ECR_cnt1/C_cnt1}'
+    interface_id = 2
+  []
+  [resistance_cnt2]
+    type = EmbeddedMaterialConstraint
+    variable = Phi
+    primary = 'resin'
+    secondary = 'cnt2'
+    resistance = '${fparse ECR_cnt2/C_cnt2}'
+    interface_id = 3
+  []
 []
 
 [Materials]
@@ -172,6 +224,18 @@ matrix_x = 0.5 # mm
     prop_names = 'sigma A'
     prop_values = '${sigma_alt} ${A_alt}'
     block = 'alt'
+  []
+  [cnt1]
+    type = ADGenericConstantMaterial
+    prop_names = 'sigma A'
+    prop_values = '${sigma_cnt1} ${A_cnt1}'
+    block = 'cnt1'
+  []
+  [cnt2]
+    type = ADGenericConstantMaterial
+    prop_names = 'sigma A'
+    prop_values = '${sigma_cnt2} ${A_cnt2}'
+    block = 'cnt2'
   []
   [charge_transport]
     type = BulkChargeTransport
@@ -225,6 +289,18 @@ matrix_x = 0.5 # mm
     execute_on = 'INITIAL'
     outputs = none
   []
+  [V_cnt1]
+    type = VolumePostprocessor
+    block = 'cnt1'
+    execute_on = 'INITIAL'
+    outputs = none
+  []
+  [V_cnt2]
+    type = VolumePostprocessor
+    block = 'cnt2'
+    execute_on = 'INITIAL'
+    outputs = none
+  []
   [V_RVE]
     type = VolumePostprocessor
     block = 'resin'
@@ -243,10 +319,16 @@ matrix_x = 0.5 # mm
     pp_names = 'V_alt V_RVE'
     execute_on = 'INITIAL'
   []
-  [volfrac_resin]
+  [volfrac_cnt1]
     type = ParsedPostprocessor
-    function = '1-volfrac_cf-volfrac_alt'
-    pp_names = 'volfrac_cf volfrac_alt'
+    function = '${A_cnt1}*V_cnt1/(V_RVE)'
+    pp_names = 'V_cnt1 V_RVE'
+    execute_on = 'INITIAL'
+  []
+  [volfrac_cnt2]
+    type = ParsedPostprocessor
+    function = '${A_cnt2}*V_cnt2/(V_RVE)'
+    pp_names = 'V_cnt2 V_RVE'
     execute_on = 'INITIAL'
   []
 []

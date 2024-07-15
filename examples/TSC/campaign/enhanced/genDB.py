@@ -7,12 +7,14 @@ import itertools
 
 dbfile = Path("db.csv")
 
-type = ["base"]
+type = ["enhanced"]
 sample = np.arange(3, dtype=np.int64)
 volfrac_cf = [np.nan]
 volfrac_alt = [np.nan]
-ECR_cf = 2 * np.logspace(0, 3, 16, base=10)
-ECR_alt = 2 * np.logspace(0, 3, 16, base=10)
+volfrac_cnt1 = [np.nan]
+volfrac_cnt2 = [np.nan]
+ECR_cnt1 = 2 * np.logspace(-3, 3, 16, base=10)
+ECR_cnt2 = 2 * np.logspace(-3, 3, 16, base=10)
 conductivity = [np.nan]
 status = ["NOT STARTED"]
 
@@ -29,8 +31,10 @@ else:
             sample,
             volfrac_cf,
             volfrac_alt,
-            ECR_cf,
-            ECR_alt,
+            volfrac_cnt1,
+            volfrac_cnt2,
+            ECR_cnt1,
+            ECR_cnt2,
             conductivity,
             status,
         ),
@@ -39,8 +43,10 @@ else:
             "sample",
             "volfrac cf",
             "volfrac alt",
-            "ECR cf",
-            "ECR alt",
+            "volfrac cnt1",
+            "volfrac cnt2",
+            "ECR cnt1",
+            "ECR cnt2",
             "conductivity",
             "status",
         ],
