@@ -4,8 +4,6 @@ t1 = 120
 dtmax = 6
 
 sigma_i_cam = 0.0005 #mS/mm
-sigma_i_sse = 0.0023 #mS/mm
-sigma_e_sse = 0.02 #mS/mm
 
 c0 = 1e-4 #mmol/mm^3
 cmax = 1e-3 #mmol/mm^3
@@ -21,7 +19,6 @@ i0 = 1e-1 #mA/mm^2
 Phi_penalty = 10
 
 E_cam = 6e4
-E_sse = 5e4
 nu_cam = 0.3
 nu_sse = 0.25
 
@@ -43,16 +40,25 @@ beta = 0.9
     type = FileMeshGenerator
     file = 'gold/NMC_80pct.exo'
   []
+  [left]
+    type = SideSetsAroundSubdomainGenerator
+    input = cathode
+    block = 'electrolyte'
+    normal = '-1 0 0'
+    normal_tol = 1e-6
+    fixed_normal = true
+    new_boundary = 'left_sse'
+  []
   [refine]
     type = RefineBlockGenerator
-    input = cathode
-    block = 'electrolytes particles'
+    input = left
+    block = 'electrolyte particles'
     refinement = '0 0'
   []
   [rename_blocks]
     type = RenameBlockGenerator
     input = refine
-    old_block = 'electrolytes particles'
+    old_block = 'electrolyte particles'
     new_block = 'SSE CAM'
   []
   [rename_boundaries]
@@ -74,6 +80,14 @@ beta = 0.9
     split_interface = true
   []
   use_displaced_mesh = false
+[]
+
+[UserObjects]
+  [random_fields]
+    type = SolutionUserObject
+    mesh = 'gold/fields.e'
+    execute_on = 'INITIAL'
+  []
 []
 
 [Variables]
@@ -119,6 +133,35 @@ beta = 0.9
       rank_two_tensor = pk1
       scalar_type = VonMisesStress
       execute_on = 'INITIAL TIMESTEP_END'
+    []
+  []
+  [Phi0]
+  []
+  [E_sse]
+    [AuxKernel]
+      type = SolutionAux
+      solution = 'random_fields'
+      from_variable = 'E'
+      block = 'SSE'
+      execute_on = 'INITIAL'
+    []
+  []
+  [sigma_i_sse]
+    [AuxKernel]
+      type = SolutionAux
+      solution = 'random_fields'
+      from_variable = 'si'
+      block = 'SSE'
+      execute_on = 'INITIAL'
+    []
+  []
+  [sigma_e_sse]
+    [AuxKernel]
+      type = SolutionAux
+      solution = 'random_fields'
+      from_variable = 'se'
+      block = 'SSE'
+      execute_on = 'INITIAL'
     []
   []
 []
@@ -267,7 +310,7 @@ beta = 0.9
   [potential]
     type = DirichletBC
     variable = Phi
-    boundary = left
+    boundary = left_sse
     value = 0
   []
   [fix_x]
@@ -307,15 +350,24 @@ beta = 0.9
 
 [Materials]
   # Electrodynamics
-  [conductivity]
-    type = ADPiecewiseConstantByBlockMaterial
-    prop_name = 'sigma'
-    subdomain_to_prop_value = 'CAM ${sigma_i_cam} SSE ${sigma_i_sse}'
+  [ionic_conductivity_cam]
+    type = ADGenericConstantMaterial
+    prop_names = 'sigma'
+    prop_values = '${sigma_i_cam}'
+    block = 'CAM'
   []
-  [conductivity_e]
-    type = ADPiecewiseConstantByBlockMaterial
-    prop_name = 'sigma_e'
-    subdomain_to_prop_value = 'SSE ${sigma_e_sse}'
+  [ionic_conductivity_sse]
+    type = ADParsedMaterial
+    property_name = 'sigma'
+    expression = 'sigma_i_sse'
+    coupled_variables = 'sigma_i_sse'
+    block = 'SSE'
+  []
+  [electronic_conductivity_sse]
+    type = ADParsedMaterial
+    property_name = 'sigma_e'
+    expression = 'sigma_e_sse'
+    coupled_variables = 'sigma_e_sse'
     block = 'SSE'
   []
   [charge_transport]
@@ -441,9 +493,17 @@ beta = 0.9
 
   # Mechanical
   [E]
-    type = ADPiecewiseConstantByBlockMaterial
-    prop_name = 'E'
-    subdomain_to_prop_value = 'CAM ${E_cam} SSE ${E_sse}'
+    type = ADGenericConstantMaterial
+    prop_names = 'E'
+    prop_values = '${E_cam}'
+    block = 'CAM'
+  []
+  [E_sse]
+    type = ADParsedMaterial
+    property_name = 'E'
+    expression = 'E_sse'
+    coupled_variables = 'E_sse'
+    block = 'SSE'
   []
   [nu]
     type = ADPiecewiseConstantByBlockMaterial
@@ -515,7 +575,7 @@ beta = 0.9
   [I]
     type = NodalSum
     variable = ir
-    boundary = 'left'
+    boundary = 'left_sse'
     outputs = none
     execute_on = 'INITIAL TIMESTEP_END'
   []
@@ -534,7 +594,7 @@ beta = 0.9
   [V1]
     type = SideAverageValue
     variable = Phi
-    boundary = left
+    boundary = left_sse
     outputs = none
     execute_on = 'INITIAL TIMESTEP_END'
   []
@@ -551,6 +611,13 @@ beta = 0.9
     pp_names = 'V2 V1'
     execute_on = 'INITIAL TIMESTEP_END'
   []
+  [cmax]
+    type = NodalExtremeValue
+    variable = c
+    value_type = max
+    block = 'CAM'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
   [cmin]
     type = NodalExtremeValue
     variable = c
@@ -561,13 +628,13 @@ beta = 0.9
 []
 
 [UserObjects]
-  # [kill_V]
-  #   type = Terminator
-  #   expression = 'V >= 4.4'
-  # []
+  [kill_V]
+    type = Terminator
+    expression = 'V >= 4.4'
+  []
   [kill_cmin]
     type = Terminator
-    expression = 'cmin < 1e-10'
+    expression = 'cmin <= 1e-8'
   []
 []
 
@@ -612,5 +679,6 @@ beta = 0.9
 [Outputs]
   exodus = true
   csv = true
+  checkpoint = true
   print_linear_residuals = false
 []

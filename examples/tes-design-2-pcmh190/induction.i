@@ -24,7 +24,7 @@ sigma_steel = '1351351.351 1219512.195 1111111.111 1030927.835 980392.1569 97087
 sigma_insul = 1e-12 # S/m
 
 # power supply
-Pmax = 50000
+Pmax = 10000
 f = 3000
 omega = '${fparse 2*pi*f}'
 
@@ -341,7 +341,7 @@ non_coil = 'air insulation container medium pipe'
   l_max_its = 300
   l_tol = 1e-06
 
-  dt = 100
+  dt = 1e6
 
   [Quadrature]
     order = CONSTANT

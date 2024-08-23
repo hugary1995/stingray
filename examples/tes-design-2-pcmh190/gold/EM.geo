@@ -17,7 +17,8 @@ pipe_Rh = 200; // Hexagon radius for pipe arrangement
 // Container, basically a fat pipe
 // 30 inch, standard
 container_H = medium_H; // height
-container_t = 9.525; // thickness
+// container_t = 9.525; // thickness
+container_t = 4.7625; // thickness
 
 // Insulation
 insul_t = 25.4; // thickness

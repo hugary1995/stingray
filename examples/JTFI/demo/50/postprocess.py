@@ -3,21 +3,18 @@ import pandas as pd
 import numpy as np
 from scipy.signal import savgol_filter
 
-result = pd.read_csv("CC_charging_out.csv")
 
-fig, ax = plt.subplots()
-ax.plot(result["C"], result["V"])
-ax.set(xlabel="C", ylabel="V", ylim=[3, 4.5])
-fig.tight_layout()
-fig.savefig("CV.png")
+fig, ax = plt.subplots(2, 1, figsize=(5, 5))
 
-plt.close()
+charging = pd.read_csv("CC_charging_out.csv")
+ax[0].plot(charging["C"], charging["V"], "k-")
+ax[0].set(xlabel="C", ylabel="V", ylim=[3, 4.5])
 
-dQ_dV = savgol_filter(np.diff(result["C"]), 50, 1, mode="nearest") / savgol_filter(
-    np.diff(result["V"]), 50, 1, mode="nearest"
+dC_dV = savgol_filter(np.diff(charging["C"]), 25, 1, mode="nearest") / savgol_filter(
+    np.diff(charging["V"]), 25, 1, mode="nearest"
 )
-fig, ax = plt.subplots()
-ax.plot(result["V"][1:], dQ_dV)
-ax.set(xlabel="V", ylabel="dQ/dV", xlim=[3, 4.5], ylim=[-0.2, 0.2])
+ax[1].plot(charging["V"][1:], dC_dV, "k-")
+ax[1].set(xlabel="V", ylabel="dC/dV", xlim=[3, 4.5], ylim=[-0.2, 0.2])
+
 fig.tight_layout()
-fig.savefig("dQ_dV.png")
+fig.savefig("charging.png")

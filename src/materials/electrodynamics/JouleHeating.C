@@ -21,7 +21,7 @@ JouleHeating::JouleHeating(const InputParameters & parameters)
   : Material(parameters),
     _q(declareADProperty<Real>("heat_source")),
     _grad_Phi(adCoupledGradient("electric_potential")),
-    _sigma(getADMaterialProperty<RankTwoTensor>("electric_conductivity"))
+    _sigma(getADMaterialProperty<Real>("electric_conductivity"))
 {
 }
 

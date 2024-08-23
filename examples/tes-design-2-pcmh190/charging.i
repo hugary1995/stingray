@@ -25,8 +25,9 @@ T0 = 300
 kB = 5.67e-8
 F = 0.6
 
-end_time = '${fparse 8*3600}' # 8 hrs
+end_time = '${fparse 24*3600}' # 24 hrs
 dt = 100
+dtmax = 500
 
 [GlobalParams]
   energy_densities = 'H'
@@ -151,7 +152,7 @@ dt = 100
   []
   [medium]
     type = ADGenericConstantMaterial
-    prop_names = 'rho cp0 kappa0'
+    prop_names = 'rho cp kappa0'
     prop_values = '${rho_medium} ${cp_medium} ${kappa_medium}'
     block = 'medium'
   []
@@ -224,7 +225,7 @@ dt = 100
   reuse_preconditioner_max_linear_its = 25
 
   end_time = ${end_time}
-  dt = ${dt}
+  dtmax = ${dtmax}
   dtmin = 1e-6
   [TimeStepper]
     type = IterationAdaptiveDT
@@ -277,6 +278,12 @@ dt = 100
     variable = T
     block = 'medium'
     value_type = max
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [medium_Texcess]
+    type = ParsedPostprocessor
+    pp_names = 'medium_Tmax'
+    expression = 'max(medium_Tmax-${T_m},0)'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [medium_S_rate]

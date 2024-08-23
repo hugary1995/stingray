@@ -21,5 +21,5 @@ protected:
   const ADVariableGradient & _grad_Phi;
 
   /// The electrical conductivity
-  const ADMaterialProperty<RankTwoTensor> & _sigma;
+  const ADMaterialProperty<Real> & _sigma;
 };
