@@ -78,9 +78,9 @@ main(int argc, char ** argv)
   // random fields
   std::default_random_engine generator;
   generator.seed(std::time(NULL));
-  MarginalGammaField E(sample_gaussian(eigvals, eigvecs, generator), 5e4, 0.05);
-  MarginalGammaField si(sample_gaussian(eigvals, eigvecs, generator), 0.0023, 0.05);
-  MarginalGammaField se(sample_gaussian(eigvals, eigvecs, generator), 0.02, 0.05);
+  MarginalGammaField E(sample_gaussian(eigvals, eigvecs, generator), 5e4, 0.9);
+  MarginalGammaField si(sample_gaussian(eigvals, eigvecs, generator), 0.0023, 0.9);
+  MarginalGammaField se(sample_gaussian(eigvals, eigvecs, generator), 0.02, 0.9);
 
   Eigen::MatrixXd C(3, 3);
   Real rho = std::stod(argv[1]);

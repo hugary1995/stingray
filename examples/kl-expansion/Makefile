@@ -1,13 +1,4 @@
 ######################################################################
-# Use the MOOSE submodule if it exists and MOOSE_DIR is not set
-MOOSE_SUBMODULE    := $(CURDIR)/../../moose
-ifneq ($(wildcard $(MOOSE_SUBMODULE)/framework/Makefile),)
-  MOOSE_DIR        ?= $(MOOSE_SUBMODULE)
-else
-  MOOSE_DIR        ?= $(CURDIR)/../../../moose
-endif
-
-######################################################################
 # Set LIBMESH_DIR if it is not already set in the environment (try our best to guess!)
 LIBMESH_DIR       ?= $(MOOSE_DIR)/libmesh/installed
 # include the library options determined by configure
