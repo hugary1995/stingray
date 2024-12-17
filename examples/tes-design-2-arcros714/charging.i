@@ -151,7 +151,7 @@ dt = 100
   []
   [medium]
     type = ADGenericConstantMaterial
-    prop_names = 'rho cp0 kappa0'
+    prop_names = 'rho cp kappa0'
     prop_values = '${rho_medium} ${cp_medium} ${kappa_medium}'
     block = 'medium'
   []
